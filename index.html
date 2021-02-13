@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metamask Login</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.3.4/web3.min.js"></script>
+</head>
+<body>
+  
+  <div>
+    <button id="sign-up">Sign Up</button>
+
+    <button id="sign-in">Login with Metamask</button>
+  </div>
+
+  <script>
+
+    const signupBtn = document.getElementById("sign-up");
+    const signinBtn = document.getElementById("sign-in");
+    const web3 = new Web3(window.ethereum);
+    
+    signupBtn.addEventListener('click', function() {
+      if (window.ethereum) {
+        handleEthereum();
+        signupUser();
+      } else {
+        // Handle the case where the user doesn't have metamask installed
+        handleEthereumError()
+      }  
+    })
+
+    signinBtn.addEventListener('click', async function() {
+      if (window.ethereum) {
+        handleEthereum();
+        fetchUserData();
+      } else {
+        // Handle the case where the user doesn't have metamask installed
+        handleEthereumError()
+      }  
+    });
+
+    const handleEthereum = () => {
+      const { ethereum } = window;
+      if (ethereum && ethereum.isMetaMask) {
+        console.log('Ethereum successfully detected!');
+        // initiate a connection to metamask if it has not been connected before
+        window.ethereum.request({ method: 'eth_requestAccounts' });
+      } else {
+        console.log('Please install MetaMask!');
+      }
+    }
+
+    const handleEthereumError = () => {
+      window.addEventListener('ethereum#initialized', handleEthereum, {
+        once: true,
+      });
+
+      // If the event is not dispatched by the end of the timeout,
+      // the user probably doesn't have MetaMask installed.
+      setTimeout(handleEthereum, 3000);
+      alert("Please install an ethereum compatible wallet like metamask")
+    }
+
+    // Signup the user
+    const signupUser = () => {
+      const publicAddress = window.ethereum.selectedAddress;
+      fetch("http://127.0.0.1:5000/api/v1/auth/signup", {
+        method: "POST",
+        headers: {"Content-type": "application/json;charset=UTF-8"},
+        body: JSON.stringify({"address": publicAddress})
+      }).then(response => {
+        console.log(response.json());
+      });
+    }
+
+    // Fetch and authenticate the user
+    const fetchUserData = () => {
+      const address = window.ethereum.selectedAddress
+      fetch(`http://127.0.0.1:5000/api/v1/users/${address}`)
+        .then((response) => response.json())
+        .then((payload) => {
+          const {data} = payload
+          return data
+        })
+        .then(handleSignMessage)
+        .then(handleAuthentication)
+        .catch((error) => {
+          alert(error);
+        });
+    }
+
+    // handle the signing of digital signature
+    const handleSignMessage = async ({address, nonce}) => {
+      try {
+        const signature = await web3.eth.personal.sign(
+          `I am signing my one-time nonce: ${nonce}`,
+          address,
+          '' // MetaMask will ignore the password argument here
+        );
+        return {address, signature}
+      } catch(error) {
+        throw new Error(
+          'You need to sign the message to be able to log in.'
+        );
+      }
+    }
+
+    // handle user authentication
+    const handleAuthentication = ({ address, signature}) => {
+      return fetch("http://127.0.0.1:5000/api/v1/auth/signin", {
+        body: JSON.stringify({ address, signature }),
+        headers: {'Content-Type': 'application/json'},
+        method: 'POST',
+      }).then((response) => {
+        console.log(response.json());
+      });
+    }
+
+  </script>
+</body>
+</html>

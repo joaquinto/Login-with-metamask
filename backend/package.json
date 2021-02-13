@@ -1,0 +1,36 @@
+{
+  "name": "metamask-login",
+  "version": "1.0.0",
+  "author": "Jonathan Odjegba <roejoeodj12@gmail.com>",
+  "description": "A decentralized application that allows you to log in using metamask",
+  "repository": "https://github.com/joaquinto/Login-with-metamask.git",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec babel-node ./src/index.js"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "@hapi/joi": "^17.1.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "eth-sig-util": "^3.0.1",
+    "ethereumjs-util": "^7.0.8",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.11.15",
+    "morgan": "^1.10.0",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.12.16",
+    "@babel/core": "^7.12.16",
+    "@babel/node": "^7.12.16",
+    "@babel/plugin-proposal-object-rest-spread": "^7.12.13",
+    "@babel/plugin-transform-runtime": "^7.12.15",
+    "@babel/preset-env": "^7.12.16",
+    "@babel/register": "^7.12.13",
+    "nodemon": "^2.0.7"
+  }
+}
